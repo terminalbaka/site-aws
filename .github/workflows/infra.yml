@@ -1,0 +1,41 @@
+name: Infra - Production
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "infra/terraform/**"
+      - ".github/workflows/infra.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "infra/terraform/**"
+      - ".github/workflows/infra.yml"
+
+jobs:
+  infra_up:
+    name: Infra - Up
+    runs-on: ubuntu-22.04
+    environment: production
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configura aws ecr
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: ${{ vars.AWS_US_REGION }}
+
+      - uses: hashicorp/setup-terraform@v3.1.2
+        with:
+          terraform_version: "${{ env.TERRAFORM_VERSION }}"
+
+      - run: terraform init
+
+      - run: terraform validate
+
+      - run: terraform apply -auto-approve
