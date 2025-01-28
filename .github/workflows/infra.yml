@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - "infra/terraform/**"
+      - "infra/opentofu/**"
       - ".github/workflows/infra.yml"
   pull_request:
     branches:
@@ -50,5 +50,8 @@ jobs:
 
       - run: terraform validate
 
-      - run: terraform plan
+      - if: github.ref == 'refs/heads/main' && github.event_name == 'pull_request'
+        run: terraform plan
 
+      - if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve
