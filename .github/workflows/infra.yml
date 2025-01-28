@@ -11,8 +11,11 @@ on:
     branches:
       - main
     paths:
-      - "infra/terraform/**"
+      - "infra/opentofu/**"
       - ".github/workflows/infra.yml"
+
+env:
+  TOFU_VERSION: 1.9.0
 
 jobs:
   infra_up:
@@ -20,6 +23,9 @@ jobs:
     runs-on: ubuntu-22.04
     environment: production
     timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: infra/opentofu
     steps:
       - uses: actions/checkout@v4
 
@@ -30,12 +36,22 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
           aws-region: ${{ vars.AWS_US_REGION }}
 
-      - uses: hashicorp/setup-terraform@v3.1.2
+      - uses: opentofu/setup-opentofu@v1
         with:
-          terraform_version: "${{ env.TERRAFORM_VERSION }}"
+          tofu_version: ${{ env.TOFU_VERSION }}
+
+      - name: Cria main.tf
+        run: |
+          mv main.tf.modelo main.tf
+          sed -i "s|<AWS_BUCKET_STATE_NAME>|${{ vars.AWS_BUCKET_STATE_NAME }}|g" main.tf
+          sed -i "s|<AWS_US_REGION>|${{ vars.AWS_US_REGION }}|g" main.tf
 
       - run: terraform init
 
       - run: terraform validate
 
-      - run: terraform apply -auto-approve
+      - if: github.ref == 'refs/heads/main' && github.event_name == 'pull_request'
+        run: terraform plan
+
+      - if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve
