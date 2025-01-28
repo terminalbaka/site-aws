@@ -54,8 +54,8 @@ resource "aws_s3_bucket_acl" "infra_site_bucket_acl" {
   acl    = "public-read"
 
   depends_on = [
-    aws_s3_bucket_ownership_controls.infra_site_bucket,
-    aws_s3_bucket_public_access_block.infra_site_bucket,
+    aws_s3_bucket_ownership_controls.infra_site_bucket_ownership,
+    aws_s3_bucket_public_access_block.infra_site_bucket_public_access,
   ]
 }
 
