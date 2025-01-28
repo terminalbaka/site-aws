@@ -1,0 +1,46 @@
+name: Código - production
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "src/**"
+      - ".github/workflows/codigo.yml"
+
+env:
+  NODE_VERSION: 22.12.0
+  BUCKET_NAME: site-terminalbaka-dev
+
+jobs:
+  codigo_up:
+    name: Código - Up
+    runs-on: ubuntu-22.04
+    environment: production
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: src
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4.2.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Configura aws ecr
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: ${{ vars.AWS_US_REGION }}
+
+      - run: npm install
+
+      - run: npm run build
+
+      - name: Copia arquivos para o bucket
+        run: |
+          cd dist
+          aws s3 sync . s3://${{ env.BUCKET_NAME }}
