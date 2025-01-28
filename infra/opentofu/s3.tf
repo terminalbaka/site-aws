@@ -67,7 +67,7 @@ resource "aws_s3_bucket_website_configuration" "infra_site_bucket_website" {
   }
 
   error_document {
-    key = "error.html"
+    key = "index.html"
   }
 
   depends_on = [
