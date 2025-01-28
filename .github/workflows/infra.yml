@@ -46,12 +46,12 @@ jobs:
           sed -i "s|<AWS_BUCKET_STATE_NAME>|${{ vars.AWS_BUCKET_STATE_NAME }}|g" main.tf
           sed -i "s|<AWS_US_REGION>|${{ vars.AWS_US_REGION }}|g" main.tf
 
-      - run: terraform init
+      - run: tofu init
 
-      - run: terraform validate
+      - run: tofu validate
 
-      - if: github.ref == 'refs/heads/main' && github.event_name == 'pull_request'
-        run: terraform plan
+      - if: github.event_name == 'pull_request'
+        run: tofu plan
 
       - if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve
+        run: tofu apply -auto-approve
