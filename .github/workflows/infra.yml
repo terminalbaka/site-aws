@@ -50,8 +50,5 @@ jobs:
 
       - run: terraform validate
 
-      - if: github.ref == 'refs/heads/main' && github.event_name == 'pull_request'
-        run: terraform plan
+      - run: terraform plan
 
-      - if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve
