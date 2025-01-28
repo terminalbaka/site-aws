@@ -49,7 +49,7 @@ resource "aws_s3_bucket_public_access_block" "infra_site_bucket_public_access" {
   depends_on = [ aws_s3_bucket.infra_site_bucket ]
 }
 
-resource "aws_s3_bucket_acl" "infra_site_bucket" {
+resource "aws_s3_bucket_acl" "infra_site_bucket_acl" {
   bucket = aws_s3_bucket.infra_site_bucket.id
   acl    = "public-read"
 
