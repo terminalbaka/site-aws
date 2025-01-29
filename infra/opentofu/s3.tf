@@ -74,3 +74,24 @@ resource "aws_s3_bucket_website_configuration" "infra_site_bucket_website" {
     aws_s3_bucket.infra_site_bucket
   ]
 }
+
+data "aws_iam_policy_document" "infra_site_bucket_policy" {
+  statement {
+    sid       = "AllowPublicRead"
+    effect    = "Allow"
+    actions   = ["s3:GetObject"]
+    resources = ["${aws_s3_bucket.infra_site_bucket.arn}/*"]
+
+    principals {
+      type        = "AWS"
+      identifiers = ["*"]
+    }
+  }
+}
+
+resource "aws_s3_bucket_policy" "infra_site_bucket_policy" {
+  bucket = aws_s3_bucket.infra_site_bucket.id
+  policy = data.aws_iam_policy_document.infra_site_bucket_policy.json
+
+  depends_on = [ aws_s3_bucket.infra_site_bucket ]
+}
